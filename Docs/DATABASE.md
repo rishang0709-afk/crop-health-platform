@@ -236,8 +236,13 @@ A separate `crops` collection may be introduced later if the platform needs:
 
 # 8. Detection Collection
 
-Collection:
+Collection: `detections`
 
+### AI Result
+
+The AI result is embedded inside the `Detection` document.
+
+There is no separate `ai_results` collection in the MVP.
 ```text
 detections
 ```
