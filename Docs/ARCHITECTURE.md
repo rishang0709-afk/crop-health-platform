@@ -182,12 +182,12 @@ It handles:
 * User management.
 * Field management.
 * Detection reports.
-* AI service communication.
+* AI service communication and orchestration.
 * Weather API communication.
 * Risk calculation.
 * Alert generation.
 * Recommendations.
-* Expert reviews.
+* Expert review workflow.
 * Follow-up reports.
 * Geospatial queries.
 * Database operations.
@@ -195,6 +195,41 @@ It handles:
 * Error handling.
 
 The backend is the **single trusted gateway** between the frontend and internal services.
+
+### Important Responsibility Boundary
+
+The backend **does not perform ML inference itself**.
+
+The backend sends crop images/data to the `ai-service/` and receives the AI prediction.
+
+```text
+Frontend
+    ↓
+Backend
+    ↓
+AI Service
+    ↓
+AI Prediction
+    ↓
+Backend
+    ↓
+Risk Engine
+    ↓
+Recommendation
+```
+
+The backend is responsible for interpreting and orchestrating the AI result with other system signals such as weather, crop stage, location, and local reports.
+
+The AI service remains responsible for:
+
+* Image preprocessing.
+* Disease/pest inference.
+* AI confidence.
+* Severity estimation where supported.
+* Model/version information.
+
+Expert users remain responsible for human validation and correction of AI results.
+
 
 ---
 
