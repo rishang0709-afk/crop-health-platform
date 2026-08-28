@@ -281,19 +281,65 @@ The AI service is responsible only for ML-related operations.
 
 It handles:
 
-* Image preprocessing.
+* Image validation and preprocessing.
 * Model inference.
 * Disease classification.
 * Pest classification where supported.
 * Confidence calculation.
 * Severity estimation where supported.
-* Model metadata.
+* Model metadata and version information.
+* Unknown/uncertain prediction handling.
 
-The AI service should not directly access MongoDB.
+The AI service should **not**:
 
-The AI service should not handle user authentication.
+* Directly access MongoDB.
+* Handle user authentication or authorization.
+* Contain business-level recommendation logic.
+* Calculate the overall crop-health risk.
+* Generate or manage alerts.
+* Perform expert validation.
+* Directly communicate with the frontend.
 
-The AI service should not contain business-level recommendation logic.
+## Communication
+
+The AI service is an internal service called by the backend.
+
+```text
+Frontend
+    ↓
+Backend
+    ↓
+AI Service
+    ↓
+Prediction
+    ↓
+Backend
+```
+
+The backend is responsible for combining the AI result with other signals such as:
+
+* Weather.
+* Crop stage.
+* Location.
+* Local reports.
+* Historical risk.
+
+The backend then performs risk assessment and recommendation orchestration.
+
+## AI Output
+
+The AI service should return a structured prediction containing, where supported:
+
+* Prediction type.
+* Disease or pest name.
+* Confidence.
+* Severity.
+* Model name.
+* Model version.
+
+The AI service must never fabricate a diagnosis when the model is uncertain.
+
+For unsupported or uncertain cases, it should return an appropriate `unknown`/uncertain result.
 
 ---
 
