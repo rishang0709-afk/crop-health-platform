@@ -1305,16 +1305,31 @@ AI_ANALYZING
    ↓
 AI_RESULT_AVAILABLE
    ↓
-EXPERT_REVIEW_REQUIRED
+   ├── High confidence → ACTIONABLE
+   │
+   └── Low confidence → EXPERT_REVIEW_REQUIRED
+                              ↓
+                    EXPERT_REVIEW_IN_PROGRESS
+                              ↓
+                       CONFIRMED / CORRECTED
+                              ↓
+                       FOLLOW_UP_REQUIRED
+                              ↓
+                            CLOSED
+```
+
+If the AI service fails:
+
+```text
+AI_ANALYZING
    ↓
-CONFIRMED / CORRECTED
-   ↓
-FOLLOW_UP_REQUIRED
-   ↓
-CLOSED
+AI_FAILED
 ```
 
 Invalid state transitions should be rejected.
+
+AI confidence must not be treated as expert confirmation. A high-confidence AI prediction may become `ACTIONABLE`, but only an expert review can produce `CONFIRMED` or `CORRECTED`.
+
 
 ---
 
