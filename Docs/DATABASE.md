@@ -339,18 +339,31 @@ Possible statuses:
 
 ```text
 CREATED
+
 AI_ANALYZING
+
 AI_RESULT_AVAILABLE
+
+ACTIONABLE
+
 EXPERT_REVIEW_REQUIRED
+
 EXPERT_REVIEW_IN_PROGRESS
+
 CONFIRMED
+
 CORRECTED
+
 AI_FAILED
+
 FOLLOW_UP_REQUIRED
+
 CLOSED
 ```
 
 The backend controls status transitions.
+
+AI confidence must not be treated as expert confirmation.
 
 Example:
 
@@ -361,21 +374,34 @@ AI_ANALYZING
    ↓
 AI_RESULT_AVAILABLE
    ↓
- ┌────────────────────┐
- │                    │
-High confidence    Low confidence
- │                    │
- ▼                    ▼
-CONFIRMED      EXPERT_REVIEW_REQUIRED
-                     ↓
-            CONFIRMED / CORRECTED
-                     ↓
-               FOLLOW_UP_REQUIRED
-                     ↓
-                  CLOSED
+   ┌──────────────────────────┐
+   │                          │
+High confidence          Low confidence
+   │                          │
+   ▼                          ▼
+ACTIONABLE            EXPERT_REVIEW_REQUIRED
+                              ↓
+                    EXPERT_REVIEW_IN_PROGRESS
+                              ↓
+                       CONFIRMED / CORRECTED
+                              ↓
+                       FOLLOW_UP_REQUIRED
+                              ↓
+                            CLOSED
 ```
 
----
+If the AI service fails:
+
+```text
+AI_ANALYZING
+   ↓
+AI_FAILED
+```
+
+`CONFIRMED` and `CORRECTED` should only be assigned as a result of expert validation. A high-confidence AI prediction should result in `ACTIONABLE`, not `CONFIRMED`.
+
+Invalid state transitions must be rejected by the backend.
+
 
 # 11. Risk Assessment Collection
 
