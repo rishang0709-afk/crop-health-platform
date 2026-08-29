@@ -346,11 +346,11 @@ async function runAnalyzeTests() {
     }
 
     // -------------------------------------------------------------------------
-    // Test 2 — Farmer can analyze own Detection (200)
+    // Test 2 — Farmer can analyze own Detection (200) -> ACTIONABLE
     // -------------------------------------------------------------------------
     const detAId = new mongoose.Types.ObjectId().toString();
     {
-      const name = 'Test 2: Authenticated farmer analyzes own Detection (200)';
+      const name = 'Test 2: Authenticated farmer analyzes own Detection (200) -> ACTIONABLE';
       seedDetection(detAId, farmerAId, 'CREATED', 'Tomato');
 
       const res = await jsonRequest(appPort, 'POST', `/api/detections/${detAId}/analyze`, {}, tokenA);
@@ -359,11 +359,11 @@ async function runAnalyzeTests() {
         res.body.success === true &&
         res.body.data &&
         res.body.data.detection &&
-        res.body.data.detection.status === 'AI_RESULT_AVAILABLE'
+        res.body.data.detection.status === 'ACTIONABLE'
       ) {
         pass(name);
       } else {
-        fail(name, `Expected 200 AI_RESULT_AVAILABLE, got ${res.status}: ${JSON.stringify(res.body)}`);
+        fail(name, `Expected 200 ACTIONABLE, got ${res.status}: ${JSON.stringify(res.body)}`);
       }
     }
 
@@ -437,7 +437,7 @@ async function runAnalyzeTests() {
       const res = await analyzePromise;
       aiServerDelayMs = 0;
 
-      if (intermediateStatus === 'AI_ANALYZING' && res.status === 200 && res.body.data.detection.status === 'AI_RESULT_AVAILABLE') {
+      if (intermediateStatus === 'AI_ANALYZING' && res.status === 200 && res.body.data.detection.status === 'ACTIONABLE') {
         pass(name);
       } else {
         fail(name, `Intermediate status was '${intermediateStatus}', expected 'AI_ANALYZING'`);
@@ -472,7 +472,7 @@ async function runAnalyzeTests() {
     // Test 8 — Re-analysis of already analyzed detection rejected with 409
     // -------------------------------------------------------------------------
     {
-      const name = 'Test 8: Re-analysis of AI_RESULT_AVAILABLE detection rejected (409)';
+      const name = 'Test 8: Re-analysis of already analyzed detection rejected (409)';
       const res = await jsonRequest(appPort, 'POST', `/api/detections/${detAId}/analyze`, {}, tokenA);
       if (res.status === 409 && res.body.error.code === 'DETECTION_ALREADY_ANALYZED') {
         pass(name);
@@ -567,16 +567,16 @@ async function runAnalyzeTests() {
     }
 
     // -------------------------------------------------------------------------
-    // Test 13 — Re-analysis of AI_FAILED detection is permitted and succeeds
+    // Test 13 — Re-analysis of AI_FAILED detection is permitted and succeeds -> ACTIONABLE
     // -------------------------------------------------------------------------
     {
-      const name = 'Test 13: Re-analysis of AI_FAILED detection succeeds';
+      const name = 'Test 13: Re-analysis of AI_FAILED detection succeeds -> ACTIONABLE';
       const detRetryId = new mongoose.Types.ObjectId().toString();
       seedDetection(detRetryId, farmerAId, 'AI_FAILED', 'Tomato');
 
       const res = await jsonRequest(appPort, 'POST', `/api/detections/${detRetryId}/analyze`, {}, tokenA);
       const doc = detectionStore.get(detRetryId);
-      if (res.status === 200 && doc && doc.status === 'AI_RESULT_AVAILABLE' && doc.prediction !== null) {
+      if (res.status === 200 && doc && doc.status === 'ACTIONABLE' && doc.prediction !== null) {
         pass(name);
       } else {
         fail(name, `Expected retry to succeed, got ${res.status}: ${JSON.stringify(res.body)}`);
@@ -592,7 +592,7 @@ async function runAnalyzeTests() {
       if (
         res.status === 200 &&
         res.body.success === true &&
-        res.body.data.detection.status === 'AI_RESULT_AVAILABLE' &&
+        res.body.data.detection.status === 'ACTIONABLE' &&
         res.body.data.detection.prediction.name === 'Early Blight' &&
         res.body.data.detection.severity.level === 'moderate'
       ) {

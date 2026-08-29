@@ -1,7 +1,8 @@
 /**
  * detectionController.js
  *
- * HTTP handlers for Detection endpoints with image upload & AI inference integration.
+ * HTTP handlers for Detection endpoints with image upload, AI inference,
+ * and confidence-based post-analysis routing.
  *
  * Routes handled:
  *   POST   /api/detections             -- createDetection (multipart/form-data)
@@ -9,16 +10,17 @@
  *   GET    /api/detections/:id         -- getDetection
  *   POST   /api/detections/:id/analyze -- analyzeDetection
  *
- * Specification & Security rules:
- *  - userId is ALWAYS derived from req.user._id (set by authenticate middleware).
- *    Client-supplied userId or owner is rejected.
- *  - A detection may ONLY be created or analyzed by the owner of the Detection / Field.
- *  - Atomic status claim: Only transitions from CREATED or AI_FAILED to AI_ANALYZING,
- *    preventing race conditions from concurrent analyze requests.
- *  - Communicates with FastAPI AI service via aiService with timeouts and response validation.
- *  - On failure, sets status = AI_FAILED and ensures no fake prediction is persisted.
- *  - On success, sets status = AI_RESULT_AVAILABLE, maps prediction and severity to top-level fields.
- *  - Response format follows Docs/API.md.
+ * Lifecycle flow for analyzeDetection:
+ *   1. Atomic claim: CREATED / AI_FAILED -> AI_ANALYZING
+ *   2. Fetch image from Detection.image.url
+ *   3. Send image to FastAPI /predict
+ *   4. Persist AI prediction, severity, and status = AI_RESULT_AVAILABLE
+ *   5. Evaluate confidence routing -> transition to ACTIONABLE or EXPERT_REVIEW_REQUIRED
+ *   6. Persist final routed state and return response
+ *
+ * Failure boundaries:
+ *   - AI inference failure -> AI_FAILED (prediction and severity cleared)
+ *   - Post-analysis routing error -> status remains AI_RESULT_AVAILABLE (AI results preserved)
  */
 
 'use strict';
@@ -33,6 +35,7 @@ const {
 } = require('../validators/detectionValidator');
 const imageStorageService = require('../services/imageStorageService');
 const aiService = require('../services/aiService');
+const confidenceRoutingService = require('../services/confidenceRoutingService');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -77,20 +80,11 @@ function extractMongooseValidationErrors(err) {
 
 /**
  * Create a new Detection record with real image upload to Cloudinary.
- *
- * - Authenticated farmer only.
- * - Requires multipart image file upload.
- * - Enforces field ownership: referenced fieldId must exist and belong to req.user._id.
- * - Uploads image buffer to Cloudinary.
- * - If DB save fails, automatically attempts orphan cleanup in Cloudinary.
- * - Initial status: CREATED.
- * - prediction & severity remain null.
  */
 async function createDetection(req, res, next) {
   let uploadedStorageKey = null;
 
   try {
-    // ---- 1. Validate request (file and body fields) ----
     const { errors, parsedData } = validateCreateDetectionInput(req);
     if (errors.length > 0) {
       return res.status(400).json({
@@ -105,7 +99,6 @@ async function createDetection(req, res, next) {
 
     const { fieldId, crop, growthStage, symptoms, location, file } = parsedData;
 
-    // ---- 2. Verify Field exists and belongs to authenticated farmer ----
     const field = await Field.findOne({
       _id: fieldId,
       userId: req.user._id,
@@ -121,7 +114,6 @@ async function createDetection(req, res, next) {
       });
     }
 
-    // ---- 3. Upload image buffer to Cloudinary ----
     let uploadResult;
     try {
       uploadResult = await imageStorageService.uploadDetectionImage(file.buffer);
@@ -136,14 +128,12 @@ async function createDetection(req, res, next) {
       });
     }
 
-    // ---- 4. Derive or use supplied crop, growthStage, and location ----
     const resolvedCrop = (crop && crop.length > 0) ? crop : field.crop;
     const resolvedGrowthStage = (growthStage !== undefined && growthStage !== null)
       ? growthStage
       : (field.growthStage || null);
     const resolvedLocation = location || field.location;
 
-    // ---- 5. Build and save Detection document ----
     const detection = new Detection({
       userId: req.user._id,
       fieldId: field._id,
@@ -165,7 +155,6 @@ async function createDetection(req, res, next) {
     try {
       await detection.save();
     } catch (dbError) {
-      // Orphan cleanup: if DB save fails, attempt to delete uploaded image from Cloudinary
       if (uploadedStorageKey) {
         await imageStorageService.deleteImage(uploadedStorageKey);
       }
@@ -201,15 +190,6 @@ async function createDetection(req, res, next) {
 
 /**
  * Return all detections owned by the authenticated farmer.
- *
- * Supports optional filters:
- *   - fieldId
- *   - status
- *   - crop
- *   - from (date)
- *   - to (date)
- *
- * Sorted by createdAt descending (newest first).
  */
 async function getDetections(req, res, next) {
   try {
@@ -225,29 +205,16 @@ async function getDetections(req, res, next) {
       });
     }
 
-    // Always filter by authenticated user
     const filter = { userId: req.user._id };
 
-    if (req.query.fieldId) {
-      filter.fieldId = req.query.fieldId;
-    }
-
-    if (req.query.status) {
-      filter.status = req.query.status.trim();
-    }
-
-    if (req.query.crop) {
-      filter.crop = req.query.crop.trim();
-    }
+    if (req.query.fieldId) filter.fieldId = req.query.fieldId;
+    if (req.query.status) filter.status = req.query.status.trim();
+    if (req.query.crop) filter.crop = req.query.crop.trim();
 
     if (req.query.from || req.query.to) {
       filter.createdAt = {};
-      if (req.query.from) {
-        filter.createdAt.$gte = new Date(req.query.from);
-      }
-      if (req.query.to) {
-        filter.createdAt.$lte = new Date(req.query.to);
-      }
+      if (req.query.from) filter.createdAt.$gte = new Date(req.query.from);
+      if (req.query.to) filter.createdAt.$lte = new Date(req.query.to);
     }
 
     const detections = await Detection.find(filter).sort({ createdAt: -1 });
@@ -269,9 +236,6 @@ async function getDetections(req, res, next) {
 
 /**
  * Return a single detection by ID for the authenticated farmer.
- *
- * Returns 404 for missing detections or detections owned by another user,
- * preventing resource enumeration.
  */
 async function getDetection(req, res, next) {
   try {
@@ -318,14 +282,14 @@ async function getDetection(req, res, next) {
 // ---------------------------------------------------------------------------
 
 /**
- * Trigger AI analysis for a Detection.
+ * Trigger AI analysis and confidence-based routing for a Detection.
  *
  * Workflow:
  *  1. Atomically claim Detection (transition from CREATED or AI_FAILED to AI_ANALYZING).
- *  2. Fetch image from Detection.image.url.
- *  3. Send image and context to FastAPI /predict.
- *  4. Validate AI response and map to Detection.prediction and Detection.severity.
- *  5. Transition status to AI_RESULT_AVAILABLE on success, or AI_FAILED on error.
+ *  2. Fetch image from Detection.image.url and call FastAPI /predict.
+ *  3. Persist AI prediction, severity, and status = AI_RESULT_AVAILABLE.
+ *  4. Evaluate confidence routing and persist status = ACTIONABLE or EXPERT_REVIEW_REQUIRED.
+ *  5. Return updated Detection.
  */
 async function analyzeDetection(req, res, next) {
   try {
@@ -342,7 +306,6 @@ async function analyzeDetection(req, res, next) {
     }
 
     // 1. Atomic claim: Only transition from CREATED or AI_FAILED to AI_ANALYZING
-    // Prevents race conditions from concurrent analyze requests on the same detection.
     const claimedDetection = await Detection.findOneAndUpdate(
       {
         _id: id,
@@ -357,7 +320,7 @@ async function analyzeDetection(req, res, next) {
       }
     );
 
-    // 2. If atomic claim failed, identify the reason safely
+    // 2. Identify reasons for claim failure
     if (!claimedDetection) {
       const existing = await Detection.findOne({
         _id: id,
@@ -408,7 +371,8 @@ async function analyzeDetection(req, res, next) {
       });
     }
 
-    // 4. Perform analysis via aiService
+    // 4. Perform AI inference via aiService
+    let aiResult;
     try {
       const context = {
         crop: claimedDetection.crop,
@@ -416,23 +380,9 @@ async function analyzeDetection(req, res, next) {
         symptoms: claimedDetection.symptoms,
       };
 
-      const aiResult = await aiService.analyzeDetectionImage(claimedDetection.image.url, context);
-
-      // 5. Update Detection with AI results
-      claimedDetection.prediction = aiResult.prediction;
-      claimedDetection.severity = aiResult.severity;
-      claimedDetection.status = DETECTION_STATUSES.AI_RESULT_AVAILABLE;
-      await claimedDetection.save();
-
-      return res.status(200).json({
-        success: true,
-        data: {
-          detection: safeDetectionData(claimedDetection),
-        },
-        message: 'Crop analysis completed',
-      });
-    } catch (error) {
-      // 6. On failure, transition to AI_FAILED and ensure no fake prediction is saved
+      aiResult = await aiService.analyzeDetectionImage(claimedDetection.image.url, context);
+    } catch (aiError) {
+      // Inference failure: transition to AI_FAILED and clear prediction/severity
       try {
         await Detection.updateOne(
           { _id: claimedDetection._id },
@@ -448,15 +398,52 @@ async function analyzeDetection(req, res, next) {
         // Suppress secondary update error
       }
 
-      const statusCode = (error instanceof aiService.AiServiceError) ? error.statusCode : 502;
-      const errorCode = (error instanceof aiService.AiServiceError) ? error.code : 'AI_ANALYSIS_FAILED';
+      const statusCode = (aiError instanceof aiService.AiServiceError) ? aiError.statusCode : 502;
+      const errorCode = (aiError instanceof aiService.AiServiceError) ? aiError.code : 'AI_ANALYSIS_FAILED';
 
       return res.status(statusCode).json({
         success: false,
         error: {
           code: errorCode,
-          message: error.message || 'Detection analysis failed',
-          details: error.details || null,
+          message: aiError.message || 'Detection analysis failed',
+          details: aiError.details || null,
+        },
+      });
+    }
+
+    // 5. Phase 1: Persist AI prediction, severity, and status = AI_RESULT_AVAILABLE
+    claimedDetection.prediction = aiResult.prediction;
+    claimedDetection.severity = aiResult.severity;
+    claimedDetection.status = DETECTION_STATUSES.AI_RESULT_AVAILABLE;
+    await claimedDetection.save();
+
+    // 6. Phase 2: Run confidence routing
+    try {
+      const routing = confidenceRoutingService.evaluateConfidenceRouting(claimedDetection.prediction);
+
+      claimedDetection.status = routing.nextStatus;
+      await claimedDetection.save();
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          detection: safeDetectionData(claimedDetection),
+          routing: {
+            confidenceBand: routing.confidenceBand,
+            requiresExpertReview: routing.requiresExpertReview,
+            reason: routing.reason,
+          },
+        },
+        message: 'Crop analysis completed',
+      });
+    } catch (routingError) {
+      // Routing failure: AI result and status = AI_RESULT_AVAILABLE remain preserved.
+      // Do NOT set AI_FAILED.
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'CONFIDENCE_ROUTING_FAILED',
+          message: `Post-analysis confidence routing failed: ${routingError.message}`,
         },
       });
     }
