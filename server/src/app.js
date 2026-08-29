@@ -1,6 +1,7 @@
 const express = require('express');
 const { getDatabaseStatus } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
+const fieldRoutes = require('./routes/fieldRoutes');
 
 const app = express();
 
@@ -29,6 +30,9 @@ app.get('/api/health', (req, res) => {
 
 // Authentication routes
 app.use('/api/auth', authRoutes);
+
+// Field routes
+app.use('/api/fields', fieldRoutes);
 
 // --- Global error handler ---
 // Must be defined last, after all routes.
