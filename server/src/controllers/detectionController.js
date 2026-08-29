@@ -1,10 +1,10 @@
 /**
  * detectionController.js
  *
- * HTTP handlers for initial Detection endpoints.
+ * HTTP handlers for Detection endpoints with image upload integration.
  *
  * Routes handled:
- *   POST   /api/detections      -- createDetection
+ *   POST   /api/detections      -- createDetection (multipart/form-data)
  *   GET    /api/detections      -- getDetections
  *   GET    /api/detections/:id  -- getDetection
  *
@@ -13,6 +13,9 @@
  *    Client-supplied userId or owner is rejected.
  *  - A detection may ONLY be created for a Field owned by the authenticated farmer.
  *    Validates field exists and belongs to req.user._id.
+ *  - Uploads crop image buffer to Cloudinary via imageStorageService.
+ *  - If database creation fails after upload, automatically deletes the uploaded
+ *    asset to avoid orphaned files.
  *  - Derives crop, growthStage, location from the associated Field when not provided.
  *  - Newly created detections begin with status = CREATED.
  *  - prediction and severity remain null / unpopulated at this stage.
@@ -32,6 +35,7 @@ const {
   validateGetDetectionsQuery,
   isValidObjectId,
 } = require('../validators/detectionValidator');
+const imageStorageService = require('../services/imageStorageService');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -71,21 +75,26 @@ function extractMongooseValidationErrors(err) {
 }
 
 // ---------------------------------------------------------------------------
-// POST /api/detections
+// POST /api/detections (multipart/form-data)
 // ---------------------------------------------------------------------------
 
 /**
- * Create a new initial Detection record.
+ * Create a new Detection record with real image upload to Cloudinary.
  *
  * - Authenticated farmer only.
+ * - Requires multipart image file upload.
  * - Enforces field ownership: referenced fieldId must exist and belong to req.user._id.
+ * - Uploads image buffer to Cloudinary.
+ * - If DB save fails, automatically attempts orphan cleanup in Cloudinary.
  * - Initial status: CREATED.
  * - prediction & severity remain null.
  */
 async function createDetection(req, res, next) {
+  let uploadedStorageKey = null;
+
   try {
-    // ---- 1. Validate request body ----
-    const errors = validateCreateDetectionInput(req.body);
+    // ---- 1. Validate request (file and body fields) ----
+    const { errors, parsedData } = validateCreateDetectionInput(req);
     if (errors.length > 0) {
       return res.status(400).json({
         success: false,
@@ -97,7 +106,7 @@ async function createDetection(req, res, next) {
       });
     }
 
-    const { fieldId, image, crop, growthStage, symptoms, location } = req.body;
+    const { fieldId, crop, growthStage, symptoms, location, file } = parsedData;
 
     // ---- 2. Verify Field exists and belongs to authenticated farmer ----
     const field = await Field.findOne({
@@ -115,39 +124,40 @@ async function createDetection(req, res, next) {
       });
     }
 
-    // ---- 3. Derive or use supplied crop, growthStage, and location ----
-    const resolvedCrop = (crop && typeof crop === 'string' && crop.trim().length > 0)
-      ? crop.trim()
-      : field.crop;
+    // ---- 3. Upload image buffer to Cloudinary ----
+    let uploadResult;
+    try {
+      uploadResult = await imageStorageService.uploadDetectionImage(file.buffer);
+      uploadedStorageKey = uploadResult.storageKey;
+    } catch (uploadError) {
+      return res.status(uploadError.status || 502).json({
+        success: false,
+        error: {
+          code: uploadError.code || 'STORAGE_UPLOAD_FAILED',
+          message: uploadError.message || 'Failed to upload image to storage service',
+        },
+      });
+    }
 
+    // ---- 4. Derive or use supplied crop, growthStage, and location ----
+    const resolvedCrop = (crop && crop.length > 0) ? crop : field.crop;
     const resolvedGrowthStage = (growthStage !== undefined && growthStage !== null)
-      ? (typeof growthStage === 'string' ? growthStage.trim() : growthStage)
+      ? growthStage
       : (field.growthStage || null);
+    const resolvedLocation = location || field.location;
 
-    const resolvedLocation = (location && location.type === 'Point' && Array.isArray(location.coordinates))
-      ? location
-      : field.location;
-
-    // ---- 4. Construct image object ----
-    const resolvedImage = {
-      url: image.url.trim(),
-      storageKey: image.storageKey ? image.storageKey.trim() : null,
-      uploadedAt: image.uploadedAt ? new Date(image.uploadedAt) : new Date(),
-    };
-
-    // ---- 5. Construct symptoms array ----
-    const resolvedSymptoms = Array.isArray(symptoms)
-      ? symptoms.map((s) => s.trim()).filter((s) => s.length > 0)
-      : [];
-
-    // ---- 6. Build and save Detection document ----
+    // ---- 5. Build and save Detection document ----
     const detection = new Detection({
       userId: req.user._id,
       fieldId: field._id,
-      image: resolvedImage,
+      image: {
+        url: uploadResult.url,
+        storageKey: uploadResult.storageKey,
+        uploadedAt: uploadResult.uploadedAt,
+      },
       crop: resolvedCrop,
       growthStage: resolvedGrowthStage,
-      symptoms: resolvedSymptoms,
+      symptoms: symptoms || [],
       prediction: null,
       severity: null,
       status: DETECTION_STATUSES.CREATED,
@@ -155,7 +165,15 @@ async function createDetection(req, res, next) {
       weatherSnapshot: null,
     });
 
-    await detection.save();
+    try {
+      await detection.save();
+    } catch (dbError) {
+      // Orphan cleanup: if DB save fails, attempt to delete uploaded image from Cloudinary
+      if (uploadedStorageKey) {
+        await imageStorageService.deleteImage(uploadedStorageKey);
+      }
+      throw dbError;
+    }
 
     return res.status(201).json({
       success: true,

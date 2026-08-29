@@ -3,19 +3,16 @@
  *
  * Input validation helpers for Detection API routes.
  *
- * These functions validate request bodies and query parameters, returning an
- * array of human-readable error messages. They do NOT throw; callers decide
- * how to handle responses.
+ * These functions validate request bodies, multipart fields, and query parameters,
+ * returning an array of human-readable error messages.
  *
- * Design decisions:
+ * Design & Security decisions:
  *  - Plain JavaScript only -- no external validation libraries (consistent
  *    with fieldValidator.js and authValidator.js).
- *  - Layer-1 controller-level validation catching obvious malformed inputs
- *    before database operations.
- *  - userId / owner are rejected on creation -- server always derives ownership
- *    from req.user (per AI_RULES.md and task spec).
+ *  - Supports multipart stringified fields (JSON-encoded symptoms and location)
+ *    with structured error handling for JSON.parse.
+ *  - Rejects client-supplied userId / owner.
  *  - Location GeoJSON validation checks longitude (-180..180) and latitude (-90..90).
- *  - Symptoms must be an array of strings if provided.
  */
 
 'use strict';
@@ -53,35 +50,119 @@ function isValidDate(d) {
   return false;
 }
 
+/**
+ * Safely parse and validate symptoms field from multipart/form-data.
+ *
+ * @param {any} symptoms - Symptoms input (array, JSON string, or comma-separated)
+ * @param {string[]} errors - Array to push error messages into
+ * @returns {string[]} Parsed array of strings
+ */
+function parseAndValidateSymptoms(symptoms, errors) {
+  if (symptoms === undefined || symptoms === null || symptoms === '') {
+    return [];
+  }
+
+  let list = symptoms;
+  if (typeof symptoms === 'string') {
+    const trimmed = symptoms.trim();
+    if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+      try {
+        list = JSON.parse(trimmed);
+      } catch (e) {
+        errors.push('symptoms must be a valid JSON array of strings');
+        return [];
+      }
+    } else if (trimmed.length > 0) {
+      list = trimmed.split(',').map((s) => s.trim()).filter(Boolean);
+    } else {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(list)) {
+    errors.push('symptoms must be an array of strings');
+    return [];
+  }
+
+  const result = [];
+  for (let i = 0; i < list.length; i++) {
+    if (typeof list[i] !== 'string' || list[i].trim().length === 0) {
+      errors.push(`symptoms[${i}] must be a non-empty string`);
+    } else {
+      result.push(list[i].trim());
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Safely parse and validate location field from multipart/form-data.
+ *
+ * @param {any} location - Location input (object or JSON string)
+ * @param {string[]} errors - Array to push error messages into
+ * @returns {object|null} Parsed GeoJSON Point object or null
+ */
+function parseAndValidateLocation(location, errors) {
+  if (location === undefined || location === null || location === '') {
+    return null;
+  }
+
+  let loc = location;
+  if (typeof location === 'string') {
+    try {
+      loc = JSON.parse(location);
+    } catch (e) {
+      errors.push('location must be a valid JSON object with GeoJSON Point format');
+      return null;
+    }
+  }
+
+  if (!loc || typeof loc !== 'object' || Array.isArray(loc)) {
+    errors.push('location must be an object with type "Point" and coordinates [longitude, latitude]');
+    return null;
+  }
+
+  if (loc.type !== 'Point') {
+    errors.push('location.type must be "Point"');
+  }
+
+  const coords = loc.coordinates;
+  if (!Array.isArray(coords) || coords.length !== 2) {
+    errors.push('location.coordinates must be an array of [longitude, latitude]');
+  } else {
+    const [lng, lat] = coords;
+
+    if (!isFiniteNumber(lng)) {
+      errors.push('location.coordinates[0] (longitude) must be a number');
+    } else if (lng < -180 || lng > 180) {
+      errors.push('longitude must be between -180 and 180');
+    }
+
+    if (!isFiniteNumber(lat)) {
+      errors.push('location.coordinates[1] (latitude) must be a number');
+    } else if (lat < -90 || lat > 90) {
+      errors.push('latitude must be between -90 and 90');
+    }
+  }
+
+  return loc;
+}
+
 // ---------------------------------------------------------------------------
 // validateCreateDetectionInput
 // ---------------------------------------------------------------------------
 
 /**
- * Validate a POST /api/detections request body.
+ * Validate a POST /api/detections request (multipart or JSON).
  *
- * Required:
- *   fieldId, image.url
- *
- * Optional / Derivable from Field:
- *   crop, growthStage, location
- *
- * Optional:
- *   image.storageKey, image.uploadedAt, symptoms
- *
- * Prohibited:
- *   userId, owner
- *
- * @param {object} body - req.body
- * @returns {string[]} Array of error messages (empty = valid)
+ * @param {object} req - Express request object (includes req.body and req.file)
+ * @returns {{ errors: string[], parsedData: object }}
  */
-function validateCreateDetectionInput(body) {
+function validateCreateDetectionInput(req) {
   const errors = [];
-
-  if (!body || typeof body !== 'object' || Array.isArray(body)) {
-    errors.push('Request body must be a JSON object');
-    return errors;
-  }
+  const body = req.body || {};
+  const file = req.file;
 
   // ---- Reject client-supplied ownership fields ----
   if (body.userId !== undefined) {
@@ -91,93 +172,55 @@ function validateCreateDetectionInput(body) {
     errors.push('owner must not be supplied by the client');
   }
 
+  // ---- Image file validation ----
+  if (!file) {
+    errors.push('Image file is required (use form field "image")');
+  }
+
   // ---- fieldId ----
-  if (!body.fieldId) {
+  if (!body.fieldId || typeof body.fieldId !== 'string' || body.fieldId.trim().length === 0) {
     errors.push('fieldId is required');
-  } else if (!isValidObjectId(body.fieldId)) {
+  } else if (!isValidObjectId(body.fieldId.trim())) {
     errors.push('fieldId must be a valid ObjectId');
   }
 
-  // ---- image ----
-  const img = body.image;
-  if (!img || typeof img !== 'object' || Array.isArray(img)) {
-    errors.push('image must be an object containing at least url');
-  } else {
-    // image.url
-    if (!img.url || typeof img.url !== 'string' || img.url.trim().length === 0) {
-      errors.push('image.url is required and must be a non-empty string');
-    }
-
-    // image.storageKey (optional)
-    if (img.storageKey !== undefined && img.storageKey !== null && typeof img.storageKey !== 'string') {
-      errors.push('image.storageKey must be a string if provided');
-    }
-
-    // image.uploadedAt (optional, defaults to now if omitted)
-    if (img.uploadedAt !== undefined && img.uploadedAt !== null && !isValidDate(img.uploadedAt)) {
-      errors.push('image.uploadedAt must be a valid date if provided');
-    }
-  }
-
-  // ---- crop (optional in body; derived from Field if omitted) ----
-  if (body.crop !== undefined && body.crop !== null) {
+  // ---- crop (optional; derived from Field if omitted) ----
+  let crop = undefined;
+  if (body.crop !== undefined && body.crop !== null && body.crop !== '') {
     if (typeof body.crop !== 'string' || body.crop.trim().length === 0) {
       errors.push('crop must be a non-empty string if provided');
+    } else {
+      crop = body.crop.trim();
     }
   }
 
-  // ---- growthStage (optional in body; derived from Field if omitted) ----
-  if (body.growthStage !== undefined && body.growthStage !== null) {
+  // ---- growthStage (optional; derived from Field if omitted) ----
+  let growthStage = undefined;
+  if (body.growthStage !== undefined && body.growthStage !== null && body.growthStage !== '') {
     if (typeof body.growthStage !== 'string') {
       errors.push('growthStage must be a string if provided');
-    }
-  }
-
-  // ---- symptoms (optional array of strings) ----
-  if (body.symptoms !== undefined && body.symptoms !== null) {
-    if (!Array.isArray(body.symptoms)) {
-      errors.push('symptoms must be an array of strings if provided');
     } else {
-      for (let i = 0; i < body.symptoms.length; i++) {
-        if (typeof body.symptoms[i] !== 'string' || body.symptoms[i].trim().length === 0) {
-          errors.push(`symptoms[${i}] must be a non-empty string`);
-        }
-      }
+      growthStage = body.growthStage.trim();
     }
   }
 
-  // ---- location (optional in body; derived from Field if omitted) ----
-  if (body.location !== undefined && body.location !== null) {
-    const loc = body.location;
-    if (typeof loc !== 'object' || Array.isArray(loc)) {
-      errors.push('location must be an object with type "Point" and coordinates [longitude, latitude]');
-    } else {
-      if (loc.type !== 'Point') {
-        errors.push('location.type must be "Point"');
-      }
+  // ---- symptoms (optional; parsed from JSON or array) ----
+  const symptoms = parseAndValidateSymptoms(body.symptoms, errors);
 
-      const coords = loc.coordinates;
-      if (!Array.isArray(coords) || coords.length !== 2) {
-        errors.push('location.coordinates must be an array of [longitude, latitude]');
-      } else {
-        const [lng, lat] = coords;
+  // ---- location (optional; parsed from JSON or object) ----
+  const location = parseAndValidateLocation(body.location, errors);
 
-        if (!isFiniteNumber(lng)) {
-          errors.push('location.coordinates[0] (longitude) must be a number');
-        } else if (lng < -180 || lng > 180) {
-          errors.push('longitude must be between -180 and 180');
-        }
-
-        if (!isFiniteNumber(lat)) {
-          errors.push('location.coordinates[1] (latitude) must be a number');
-        } else if (lat < -90 || lat > 90) {
-          errors.push('latitude must be between -90 and 90');
-        }
-      }
-    }
-  }
-
-  return errors;
+  return {
+    errors,
+    parsedData: {
+      fieldId: body.fieldId ? body.fieldId.trim() : undefined,
+      crop,
+      growthStage,
+      symptoms,
+      location,
+      file,
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -234,5 +277,7 @@ function validateGetDetectionsQuery(query) {
 module.exports = {
   validateCreateDetectionInput,
   validateGetDetectionsQuery,
+  parseAndValidateSymptoms,
+  parseAndValidateLocation,
   isValidObjectId,
 };
