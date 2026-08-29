@@ -1,5 +1,6 @@
 const express = require('express');
 const { getDatabaseStatus } = require('./config/database');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
@@ -22,6 +23,29 @@ app.get('/api/health', (req, res) => {
     database: {
       status: db.status,
       connected: db.connected,
+    },
+  });
+});
+
+// Authentication routes
+app.use('/api/auth', authRoutes);
+
+// --- Global error handler ---
+// Must be defined last, after all routes.
+// Returns consistent JSON error responses and never leaks stack traces
+// to clients in production.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err.message);
+
+  res.status(err.status || 500).json({
+    success: false,
+    error: {
+      code: err.code || 'INTERNAL_ERROR',
+      message:
+        process.env.NODE_ENV === 'production'
+          ? 'An unexpected error occurred.'
+          : err.message,
     },
   });
 });
