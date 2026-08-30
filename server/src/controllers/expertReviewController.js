@@ -32,6 +32,7 @@ const {
   validateCorrectReviewInput,
   validateReviewQueueQuery,
 } = require('../validators/expertReviewValidator');
+const recommendationEngineService = require('../services/recommendationEngineService');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -405,6 +406,13 @@ async function confirmReview(req, res, next) {
         session.endSession();
       }
 
+      // 3. Non-blocking recommendation regeneration using expert confirmed diagnosis
+      try {
+        await recommendationEngineService.generateAndPersistRecommendation(detectionId);
+      } catch (recErr) {
+        console.warn(`Post-confirmation recommendation regeneration warning for detection ${detectionId}: ${recErr.message}`);
+      }
+
       return res.status(200).json({
         success: true,
         data: {
@@ -537,6 +545,13 @@ async function correctReview(req, res, next) {
       if (useTransactions && session) {
         await session.commitTransaction();
         session.endSession();
+      }
+
+      // 3. Non-blocking recommendation regeneration using expert corrected diagnosis
+      try {
+        await recommendationEngineService.generateAndPersistRecommendation(detectionId);
+      } catch (recErr) {
+        console.warn(`Post-correction recommendation regeneration warning for detection ${detectionId}: ${recErr.message}`);
       }
 
       return res.status(200).json({

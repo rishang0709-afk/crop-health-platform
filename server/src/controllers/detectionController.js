@@ -38,6 +38,7 @@ const aiService = require('../services/aiService');
 const confidenceRoutingService = require('../services/confidenceRoutingService');
 const weatherService = require('../services/weatherService');
 const riskEngineService = require('../services/riskEngineService');
+const recommendationEngineService = require('../services/recommendationEngineService');
 const { RiskAssessment } = require('../models/RiskAssessment');
 
 // ---------------------------------------------------------------------------
@@ -500,6 +501,14 @@ async function analyzeDetection(req, res, next) {
       console.warn(`Contextual risk calculation warning for detection ${claimedDetection._id}: ${riskError.message}`);
     }
 
+    // 8. Phase 4: Generate IPM recommendation (non-blocking)
+    let recommendation = null;
+    try {
+      recommendation = await recommendationEngineService.generateAndPersistRecommendation(claimedDetection._id);
+    } catch (recError) {
+      console.warn(`IPM recommendation generation warning for detection ${claimedDetection._id}: ${recError.message}`);
+    }
+
     return res.status(200).json({
       success: true,
       data: {
@@ -516,6 +525,19 @@ async function analyzeDetection(req, res, next) {
               level: riskAssessment.level,
               factors: riskAssessment.factors,
               explanation: riskAssessment.explanation,
+            }
+          : null,
+        recommendation: recommendation
+          ? {
+              id: recommendation._id.toString(),
+              ruleVersion: recommendation.ruleVersion,
+              effectiveDiagnosis: recommendation.effectiveDiagnosis,
+              immediateActions: recommendation.immediateActions,
+              monitoringActions: recommendation.monitoringActions,
+              culturalControls: recommendation.culturalControls,
+              biologicalControls: recommendation.biologicalControls,
+              chemicalGuidance: recommendation.chemicalGuidance,
+              expertReferral: recommendation.expertReferral,
             }
           : null,
       },

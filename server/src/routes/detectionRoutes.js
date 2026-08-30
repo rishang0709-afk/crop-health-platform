@@ -29,6 +29,10 @@ const {
   getDetectionRisk,
   recalculateDetectionRisk,
 } = require('../controllers/riskController');
+const {
+  getDetectionRecommendation,
+  regenerateDetectionRecommendation,
+} = require('../controllers/recommendationController');
 
 const router = express.Router();
 
@@ -42,5 +46,9 @@ router.post('/:id/analyze', authenticate, analyzeDetection);
 // Contextual Risk Assessment routes (Docs/API.md Section 22)
 router.get('/:id/risk', authenticate, getDetectionRisk);
 router.post('/:id/risk/recalculate', authenticate, recalculateDetectionRisk);
+
+// IPM Recommendation routes (Docs/DATABASE.md Section 16, Docs/ARCHITECTURE.md Section 17)
+router.get('/:id/recommendation', authenticate, getDetectionRecommendation);
+router.post('/:id/recommendation/regenerate', authenticate, regenerateDetectionRecommendation);
 
 module.exports = router;

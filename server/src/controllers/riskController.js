@@ -18,6 +18,7 @@ const { Field } = require('../models/Field');
 const { RiskAssessment } = require('../models/RiskAssessment');
 const weatherService = require('../services/weatherService');
 const riskEngineService = require('../services/riskEngineService');
+const recommendationEngineService = require('../services/recommendationEngineService');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -212,6 +213,13 @@ async function recalculateDetectionRisk(req, res, next) {
         { _id: detection._id },
         { $set: { weatherSnapshot } }
       );
+    }
+
+    // 6. Regenerate IPM recommendation (non-blocking)
+    try {
+      await recommendationEngineService.generateAndPersistRecommendation(detection._id);
+    } catch (recError) {
+      console.warn(`Post-recalculation recommendation regeneration warning for detection ${detection._id}: ${recError.message}`);
     }
 
     return res.status(200).json({
