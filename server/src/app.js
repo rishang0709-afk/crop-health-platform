@@ -3,6 +3,7 @@ const { getDatabaseStatus } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const fieldRoutes = require('./routes/fieldRoutes');
 const detectionRoutes = require('./routes/detectionRoutes');
+const expertReviewRoutes = require('./routes/expertReviewRoutes');
 
 const app = express();
 
@@ -37,6 +38,9 @@ app.use('/api/fields', fieldRoutes);
 
 // Detection routes
 app.use('/api/detections', detectionRoutes);
+
+// Expert Review routes
+app.use('/api/expert-reviews', expertReviewRoutes);
 
 // --- Global error handler ---
 // Must be defined last, after all routes.
