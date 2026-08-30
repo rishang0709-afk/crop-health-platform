@@ -33,6 +33,10 @@ const {
   getDetectionRecommendation,
   regenerateDetectionRecommendation,
 } = require('../controllers/recommendationController');
+const {
+  createFollowUp,
+  getFollowUps,
+} = require('../controllers/followUpController');
 
 const router = express.Router();
 
@@ -50,5 +54,9 @@ router.post('/:id/risk/recalculate', authenticate, recalculateDetectionRisk);
 // IPM Recommendation routes (Docs/DATABASE.md Section 16, Docs/ARCHITECTURE.md Section 17)
 router.get('/:id/recommendation', authenticate, getDetectionRecommendation);
 router.post('/:id/recommendation/regenerate', authenticate, regenerateDetectionRecommendation);
+
+// Follow-Up routes (Docs/API.md Sections 28-29)
+router.get('/:id/follow-ups', authenticate, getFollowUps);
+router.post('/:id/follow-ups', authenticate, uploadImageMiddleware, createFollowUp);
 
 module.exports = router;

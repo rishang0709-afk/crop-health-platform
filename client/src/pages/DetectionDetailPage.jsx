@@ -15,6 +15,7 @@ import AnalysisResultView from '../components/detections/AnalysisResultView';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorAlert from '../components/common/ErrorAlert';
 import EmptyState from '../components/common/EmptyState';
+import FollowUpTimeline from '../components/followUps/FollowUpTimeline';
 
 export default function DetectionDetailPage() {
   const { id } = useParams();
@@ -243,6 +244,9 @@ export default function DetectionDetailPage() {
           />
         </div>
       </div>
+
+      {/* Longitudinal Crop Health Timeline */}
+      <FollowUpTimeline detection={detection} />
     </div>
   );
 }
