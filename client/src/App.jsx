@@ -28,6 +28,15 @@ import NewDetectionPage from './pages/NewDetectionPage';
 import DetectionDetailPage from './pages/DetectionDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 
+// Officer Layout & Guard
+import OfficerLayout from './layouts/OfficerLayout';
+import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
+
+// Officer Pages
+import OfficerDashboardPage from './pages/officer/OfficerDashboardPage';
+import HotspotListPage from './pages/officer/HotspotListPage';
+import SurveillanceMapPage from './pages/officer/SurveillanceMapPage';
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -57,10 +66,26 @@ export default function App() {
             <Route path="/detections/:id" element={<DetectionDetailPage />} />
           </Route>
 
+          {/* Protected Officer Routes */}
+          <Route
+            path="/officer"
+            element={
+              <RoleProtectedRoute allowedRoles={['officer', 'admin']}>
+                <OfficerLayout />
+              </RoleProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/officer/dashboard" replace />} />
+            <Route path="dashboard" element={<OfficerDashboardPage />} />
+            <Route path="hotspots" element={<HotspotListPage />} />
+            <Route path="map" element={<SurveillanceMapPage />} />
+          </Route>
+
           {/* 404 Catch-All */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
+
   );
 }
