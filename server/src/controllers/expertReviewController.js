@@ -33,6 +33,7 @@ const {
   validateReviewQueueQuery,
 } = require('../validators/expertReviewValidator');
 const recommendationEngineService = require('../services/recommendationEngineService');
+const alertService = require('../services/alertService');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -413,6 +414,13 @@ async function confirmReview(req, res, next) {
         console.warn(`Post-confirmation recommendation regeneration warning for detection ${detectionId}: ${recErr.message}`);
       }
 
+      // 4. Non-blocking alert generation for expert confirmation
+      try {
+        await alertService.createExpertReviewCompletionAlert(detectionId, review);
+      } catch (alertErr) {
+        console.warn(`Post-confirmation alert generation warning for detection ${detectionId}: ${alertErr.message}`);
+      }
+
       return res.status(200).json({
         success: true,
         data: {
@@ -552,6 +560,13 @@ async function correctReview(req, res, next) {
         await recommendationEngineService.generateAndPersistRecommendation(detectionId);
       } catch (recErr) {
         console.warn(`Post-correction recommendation regeneration warning for detection ${detectionId}: ${recErr.message}`);
+      }
+
+      // 4. Non-blocking alert generation for expert correction
+      try {
+        await alertService.createExpertReviewCompletionAlert(detectionId, review);
+      } catch (alertErr) {
+        console.warn(`Post-correction alert generation warning for detection ${detectionId}: ${alertErr.message}`);
       }
 
       return res.status(200).json({

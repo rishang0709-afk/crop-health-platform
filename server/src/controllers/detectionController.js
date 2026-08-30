@@ -39,6 +39,7 @@ const confidenceRoutingService = require('../services/confidenceRoutingService')
 const weatherService = require('../services/weatherService');
 const riskEngineService = require('../services/riskEngineService');
 const recommendationEngineService = require('../services/recommendationEngineService');
+const alertService = require('../services/alertService');
 const { RiskAssessment } = require('../models/RiskAssessment');
 
 // ---------------------------------------------------------------------------
@@ -398,6 +399,8 @@ async function analyzeDetection(req, res, next) {
             },
           }
         );
+        claimedDetection.status = DETECTION_STATUSES.AI_FAILED;
+        await alertService.evaluateAndCreateAlerts({ detection: claimedDetection });
       } catch (saveErr) {
         // Suppress secondary update error
       }
@@ -507,6 +510,16 @@ async function analyzeDetection(req, res, next) {
       recommendation = await recommendationEngineService.generateAndPersistRecommendation(claimedDetection._id);
     } catch (recError) {
       console.warn(`IPM recommendation generation warning for detection ${claimedDetection._id}: ${recError.message}`);
+    }
+
+    // 9. Phase 5: Evaluate and generate early warning alerts (non-blocking)
+    try {
+      await alertService.evaluateAndCreateAlerts({
+        detection: claimedDetection,
+        riskAssessment,
+      });
+    } catch (alertError) {
+      console.warn(`Alert generation warning for detection ${claimedDetection._id}: ${alertError.message}`);
     }
 
     return res.status(200).json({

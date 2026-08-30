@@ -19,6 +19,7 @@ const { RiskAssessment } = require('../models/RiskAssessment');
 const weatherService = require('../services/weatherService');
 const riskEngineService = require('../services/riskEngineService');
 const recommendationEngineService = require('../services/recommendationEngineService');
+const alertService = require('../services/alertService');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -220,6 +221,16 @@ async function recalculateDetectionRisk(req, res, next) {
       await recommendationEngineService.generateAndPersistRecommendation(detection._id);
     } catch (recError) {
       console.warn(`Post-recalculation recommendation regeneration warning for detection ${detection._id}: ${recError.message}`);
+    }
+
+    // 7. Re-evaluate early warning alerts (non-blocking)
+    try {
+      await alertService.evaluateAndCreateAlerts({
+        detection,
+        riskAssessment: updatedRisk,
+      });
+    } catch (alertErr) {
+      console.warn(`Post-recalculation alert evaluation warning for detection ${detection._id}: ${alertErr.message}`);
     }
 
     return res.status(200).json({
