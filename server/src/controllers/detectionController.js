@@ -36,6 +36,9 @@ const {
 const imageStorageService = require('../services/imageStorageService');
 const aiService = require('../services/aiService');
 const confidenceRoutingService = require('../services/confidenceRoutingService');
+const weatherService = require('../services/weatherService');
+const riskEngineService = require('../services/riskEngineService');
+const { RiskAssessment } = require('../models/RiskAssessment');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -418,24 +421,11 @@ async function analyzeDetection(req, res, next) {
     await claimedDetection.save();
 
     // 6. Phase 2: Run confidence routing
+    let routing;
     try {
-      const routing = confidenceRoutingService.evaluateConfidenceRouting(claimedDetection.prediction);
-
+      routing = confidenceRoutingService.evaluateConfidenceRouting(claimedDetection.prediction);
       claimedDetection.status = routing.nextStatus;
       await claimedDetection.save();
-
-      return res.status(200).json({
-        success: true,
-        data: {
-          detection: safeDetectionData(claimedDetection),
-          routing: {
-            confidenceBand: routing.confidenceBand,
-            requiresExpertReview: routing.requiresExpertReview,
-            reason: routing.reason,
-          },
-        },
-        message: 'Crop analysis completed',
-      });
     } catch (routingError) {
       // Routing failure: AI result and status = AI_RESULT_AVAILABLE remain preserved.
       // Do NOT set AI_FAILED.
@@ -447,6 +437,90 @@ async function analyzeDetection(req, res, next) {
         },
       });
     }
+
+    // 7. Phase 3: Fetch weather snapshot and calculate contextual risk (non-blocking)
+    let weatherSnapshot = null;
+    let riskAssessment = null;
+
+    try {
+      // Resolve coordinates from detection or parent field
+      let coords = claimedDetection.location?.coordinates;
+      if (!coords || !Array.isArray(coords)) {
+        const parentField = await Field.findById(claimedDetection.fieldId);
+        coords = parentField?.location?.coordinates;
+      }
+
+      if (coords && coords.length === 2) {
+        weatherSnapshot = await weatherService.getWeatherSnapshot({
+          longitude: coords[0],
+          latitude: coords[1],
+        });
+      }
+
+      // Persist weather snapshot on Detection if obtained
+      if (weatherSnapshot) {
+        claimedDetection.weatherSnapshot = weatherSnapshot;
+        await claimedDetection.save();
+      }
+
+      // Calculate and persist contextual risk if diagnosis is assessable (not unknown)
+      if (claimedDetection.prediction?.type !== 'unknown') {
+        const riskResult = riskEngineService.calculateRisk(claimedDetection, weatherSnapshot);
+        if (riskResult) {
+          if (mongoose.connection.readyState === 1) {
+            riskAssessment = await RiskAssessment.findOneAndUpdate(
+              { detectionId: claimedDetection._id },
+              {
+                $set: {
+                  userId: claimedDetection.userId,
+                  fieldId: claimedDetection.fieldId,
+                  score: riskResult.score,
+                  level: riskResult.level,
+                  factors: riskResult.factors,
+                  explanation: riskResult.explanation,
+                  weatherSnapshot: riskResult.weatherSnapshot,
+                },
+              },
+              { upsert: true, returnDocument: 'after', runValidators: true }
+            );
+          } else {
+            // In-memory representation for test environments without an active MongoDB connection
+            riskAssessment = {
+              _id: new mongoose.Types.ObjectId(),
+              score: riskResult.score,
+              level: riskResult.level,
+              factors: riskResult.factors,
+              explanation: riskResult.explanation,
+            };
+          }
+        }
+      }
+    } catch (riskError) {
+      // Non-blocking: Weather or risk calculation issues must not fail the detection response
+      console.warn(`Contextual risk calculation warning for detection ${claimedDetection._id}: ${riskError.message}`);
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        detection: safeDetectionData(claimedDetection),
+        routing: {
+          confidenceBand: routing.confidenceBand,
+          requiresExpertReview: routing.requiresExpertReview,
+          reason: routing.reason,
+        },
+        risk: riskAssessment
+          ? {
+              id: riskAssessment._id.toString(),
+              score: riskAssessment.score,
+              level: riskAssessment.level,
+              factors: riskAssessment.factors,
+              explanation: riskAssessment.explanation,
+            }
+          : null,
+      },
+      message: 'Crop analysis completed',
+    });
   } catch (error) {
     next(error);
   }

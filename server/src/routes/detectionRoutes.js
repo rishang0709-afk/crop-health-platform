@@ -25,6 +25,10 @@ const {
   getDetection,
   analyzeDetection,
 } = require('../controllers/detectionController');
+const {
+  getDetectionRisk,
+  recalculateDetectionRisk,
+} = require('../controllers/riskController');
 
 const router = express.Router();
 
@@ -34,5 +38,9 @@ router.post('/', authenticate, uploadImageMiddleware, createDetection);
 router.get('/', authenticate, getDetections);
 router.get('/:id', authenticate, getDetection);
 router.post('/:id/analyze', authenticate, analyzeDetection);
+
+// Contextual Risk Assessment routes (Docs/API.md Section 22)
+router.get('/:id/risk', authenticate, getDetectionRisk);
+router.post('/:id/risk/recalculate', authenticate, recalculateDetectionRisk);
 
 module.exports = router;
