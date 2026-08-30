@@ -179,7 +179,6 @@ const recommendationSchema = new mongoose.Schema(
 // Indexes
 // ---------------------------------------------------------------------------
 
-recommendationSchema.index({ detectionId: 1 }, { unique: true });
 recommendationSchema.index({ userId: 1, createdAt: -1 });
 recommendationSchema.index({ fieldId: 1 });
 

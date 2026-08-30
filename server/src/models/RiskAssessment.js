@@ -145,7 +145,6 @@ const riskAssessmentSchema = new mongoose.Schema(
 // Indexes
 // ---------------------------------------------------------------------------
 
-riskAssessmentSchema.index({ detectionId: 1 }, { unique: true });
 riskAssessmentSchema.index({ userId: 1, createdAt: -1 });
 riskAssessmentSchema.index({ fieldId: 1 });
 

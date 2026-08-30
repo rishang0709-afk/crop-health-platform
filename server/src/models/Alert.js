@@ -163,9 +163,6 @@ const alertSchema = new mongoose.Schema(
 // ---------------------------------------------------------------------------
 
 alertSchema.index({ userId: 1, isRead: 1, createdAt: -1 });
-alertSchema.index({ relatedDetectionId: 1 });
-alertSchema.index({ relatedFieldId: 1 });
-alertSchema.index({ dedupKey: 1 }, { unique: true, sparse: true });
 
 // ---------------------------------------------------------------------------
 // Exports
