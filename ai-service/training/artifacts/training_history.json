@@ -1,0 +1,1173 @@
+{
+  "dataset_version": "crop-health-v1",
+  "architecture": "mobilenet_v3_small",
+  "device": "cpu",
+  "total_duration_seconds": 1227.46,
+  "warmup_epochs_planned": 5,
+  "finetune_epochs_planned": 20,
+  "best_val_macro_f1": 0.9783,
+  "early_stopping_triggered": true,
+  "class_weights": {
+    "background": 0.9776,
+    "potato_early_blight": 0.8467,
+    "potato_healthy": 2.1965,
+    "potato_late_blight": 0.8467,
+    "tomato_early_blight": 0.846,
+    "tomato_healthy": 0.672,
+    "tomato_late_blight": 0.6145
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "stage": 1,
+      "train_loss": 0.4282,
+      "train_accuracy": 0.8576,
+      "train_macro_f1": 0.8354,
+      "val_loss": 0.2978,
+      "val_accuracy": 0.8934,
+      "val_macro_precision": 0.8887,
+      "val_macro_recall": 0.8867,
+      "val_macro_f1": 0.879,
+      "val_weighted_f1": 0.8899,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 0.9642857142857143,
+          "f1_score": 0.9818181818181818,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.8786127167630058,
+          "recall": 1.0,
+          "f1_score": 0.9353846153846154,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.7096774193548387,
+          "recall": 0.9166666666666666,
+          "f1_score": 0.8,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9910714285714286,
+          "recall": 0.7302631578947368,
+          "f1_score": 0.8409090909090909,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9107142857142857,
+          "recall": 0.6754966887417219,
+          "f1_score": 0.7756653992395437,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.8623188405797102,
+          "recall": 1.0,
+          "f1_score": 0.9260700389105059,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.868421052631579,
+          "recall": 0.9198606271777003,
+          "f1_score": 0.8934010152284264,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 2,
+      "stage": 1,
+      "train_loss": 0.2281,
+      "train_accuracy": 0.9219,
+      "train_macro_f1": 0.9028,
+      "val_loss": 0.1943,
+      "val_accuracy": 0.9292,
+      "val_macro_precision": 0.8978,
+      "val_macro_recall": 0.9396,
+      "val_macro_f1": 0.9131,
+      "val_weighted_f1": 0.9289,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9212121212121213,
+          "recall": 1.0,
+          "f1_score": 0.9589905362776026,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.6666666666666666,
+          "recall": 1.0,
+          "f1_score": 0.8,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9,
+          "recall": 0.8881578947368421,
+          "f1_score": 0.8940397350993378,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.8897058823529411,
+          "recall": 0.8013245033112583,
+          "f1_score": 0.8432055749128919,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.948,
+          "recall": 0.9957983193277311,
+          "f1_score": 0.9713114754098361,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9588014981273408,
+          "recall": 0.89198606271777,
+          "f1_score": 0.924187725631769,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 3,
+      "stage": 1,
+      "train_loss": 0.1954,
+      "train_accuracy": 0.9317,
+      "train_macro_f1": 0.9271,
+      "val_loss": 0.2361,
+      "val_accuracy": 0.9229,
+      "val_macro_precision": 0.922,
+      "val_macro_recall": 0.9305,
+      "val_macro_f1": 0.9236,
+      "val_weighted_f1": 0.9235,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 0.9910714285714286,
+          "f1_score": 0.9955156950672646,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9551282051282052,
+          "recall": 0.9802631578947368,
+          "f1_score": 0.9675324675324676,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.8846153846153846,
+          "recall": 0.9583333333333334,
+          "f1_score": 0.92,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.96875,
+          "recall": 0.8157894736842105,
+          "f1_score": 0.8857142857142857,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.7472527472527473,
+          "recall": 0.9006622516556292,
+          "f1_score": 0.8168168168168168,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.937007874015748,
+          "recall": 1.0,
+          "f1_score": 0.967479674796748,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9613899613899614,
+          "recall": 0.867595818815331,
+          "f1_score": 0.9120879120879121,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 4,
+      "stage": 1,
+      "train_loss": 0.1661,
+      "train_accuracy": 0.9398,
+      "train_macro_f1": 0.9334,
+      "val_loss": 0.1343,
+      "val_accuracy": 0.9543,
+      "val_macro_precision": 0.9351,
+      "val_macro_recall": 0.9605,
+      "val_macro_f1": 0.9455,
+      "val_weighted_f1": 0.9544,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 0.9910714285714286,
+          "f1_score": 0.9955156950672646,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9806451612903225,
+          "recall": 1.0,
+          "f1_score": 0.990228013029316,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.7741935483870968,
+          "recall": 1.0,
+          "f1_score": 0.8727272727272727,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9785714285714285,
+          "recall": 0.9013157894736842,
+          "f1_score": 0.9383561643835616,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.8888888888888888,
+          "recall": 0.9006622516556292,
+          "f1_score": 0.8947368421052632,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.9834710743801653,
+          "recall": 1.0,
+          "f1_score": 0.9916666666666667,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9401408450704225,
+          "recall": 0.9303135888501742,
+          "f1_score": 0.9352014010507881,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 5,
+      "stage": 1,
+      "train_loss": 0.1347,
+      "train_accuracy": 0.9528,
+      "train_macro_f1": 0.945,
+      "val_loss": 0.1708,
+      "val_accuracy": 0.9391,
+      "val_macro_precision": 0.9118,
+      "val_macro_recall": 0.9456,
+      "val_macro_f1": 0.9235,
+      "val_weighted_f1": 0.9391,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 0.9910714285714286,
+          "f1_score": 0.9955156950672646,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.8786127167630058,
+          "recall": 1.0,
+          "f1_score": 0.9353846153846154,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.7058823529411765,
+          "recall": 1.0,
+          "f1_score": 0.8275862068965517,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.96875,
+          "recall": 0.8157894736842105,
+          "f1_score": 0.8857142857142857,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.8881578947368421,
+          "recall": 0.8940397350993378,
+          "f1_score": 0.8910891089108911,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.9874476987447699,
+          "recall": 0.9915966386554622,
+          "f1_score": 0.989517819706499,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.953405017921147,
+          "recall": 0.926829268292683,
+          "f1_score": 0.9399293286219081,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 6,
+      "stage": 2,
+      "train_loss": 0.0986,
+      "train_accuracy": 0.9662,
+      "train_macro_f1": 0.9615,
+      "val_loss": 0.163,
+      "val_accuracy": 0.9418,
+      "val_macro_precision": 0.9279,
+      "val_macro_recall": 0.9427,
+      "val_macro_f1": 0.931,
+      "val_weighted_f1": 0.9404,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9096385542168675,
+          "recall": 0.993421052631579,
+          "f1_score": 0.949685534591195,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.7741935483870968,
+          "recall": 1.0,
+          "f1_score": 0.8727272727272727,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9777777777777777,
+          "recall": 0.868421052631579,
+          "f1_score": 0.9198606271777003,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9508196721311475,
+          "recall": 0.7682119205298014,
+          "f1_score": 0.8498168498168498,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.9714285714285714,
+          "recall": 1.0,
+          "f1_score": 0.9855072463768116,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9114754098360656,
+          "recall": 0.9686411149825784,
+          "f1_score": 0.9391891891891891,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 7,
+      "stage": 2,
+      "train_loss": 0.0821,
+      "train_accuracy": 0.972,
+      "train_macro_f1": 0.9697,
+      "val_loss": 0.1495,
+      "val_accuracy": 0.9444,
+      "val_macro_precision": 0.9112,
+      "val_macro_recall": 0.9476,
+      "val_macro_f1": 0.9221,
+      "val_weighted_f1": 0.9446,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9101796407185628,
+          "recall": 1.0,
+          "f1_score": 0.9529780564263323,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.631578947368421,
+          "recall": 1.0,
+          "f1_score": 0.7741935483870968,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9696969696969697,
+          "recall": 0.8421052631578947,
+          "f1_score": 0.9014084507042254,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9407407407407408,
+          "recall": 0.8410596026490066,
+          "f1_score": 0.8881118881118881,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.9874476987447699,
+          "recall": 0.9915966386554622,
+          "f1_score": 0.989517819706499,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9385665529010239,
+          "recall": 0.9581881533101045,
+          "f1_score": 0.9482758620689655,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 8,
+      "stage": 2,
+      "train_loss": 0.0642,
+      "train_accuracy": 0.9756,
+      "train_macro_f1": 0.9759,
+      "val_loss": 0.1427,
+      "val_accuracy": 0.9534,
+      "val_macro_precision": 0.9469,
+      "val_macro_recall": 0.9545,
+      "val_macro_f1": 0.9484,
+      "val_weighted_f1": 0.9525,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.926829268292683,
+          "recall": 1.0,
+          "f1_score": 0.9620253164556962,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.8571428571428571,
+          "recall": 1.0,
+          "f1_score": 0.9230769230769231,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9784172661870504,
+          "recall": 0.8947368421052632,
+          "f1_score": 0.9347079037800687,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.968503937007874,
+          "recall": 0.8145695364238411,
+          "f1_score": 0.8848920863309353,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.967479674796748,
+          "recall": 1.0,
+          "f1_score": 0.9834710743801653,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.93,
+          "recall": 0.9721254355400697,
+          "f1_score": 0.9505962521294719,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 9,
+      "stage": 2,
+      "train_loss": 0.0546,
+      "train_accuracy": 0.9816,
+      "train_macro_f1": 0.9775,
+      "val_loss": 0.0901,
+      "val_accuracy": 0.9695,
+      "val_macro_precision": 0.9595,
+      "val_macro_recall": 0.9733,
+      "val_macro_f1": 0.9658,
+      "val_weighted_f1": 0.9695,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9556962025316456,
+          "recall": 0.993421052631579,
+          "f1_score": 0.9741935483870968,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.8888888888888888,
+          "recall": 1.0,
+          "f1_score": 0.9411764705882353,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9793103448275862,
+          "recall": 0.9342105263157895,
+          "f1_score": 0.9562289562289562,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9333333333333333,
+          "recall": 0.9271523178807947,
+          "f1_score": 0.9302325581395349,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.9875518672199171,
+          "recall": 1.0,
+          "f1_score": 0.9937369519832986,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9717314487632509,
+          "recall": 0.9581881533101045,
+          "f1_score": 0.9649122807017544,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 10,
+      "stage": 2,
+      "train_loss": 0.0498,
+      "train_accuracy": 0.9832,
+      "train_macro_f1": 0.9831,
+      "val_loss": 0.0947,
+      "val_accuracy": 0.9695,
+      "val_macro_precision": 0.9687,
+      "val_macro_recall": 0.9737,
+      "val_macro_f1": 0.9711,
+      "val_weighted_f1": 0.9695,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.967948717948718,
+          "recall": 0.993421052631579,
+          "f1_score": 0.9805194805194806,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.96,
+          "recall": 1.0,
+          "f1_score": 0.9795918367346939,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9794520547945206,
+          "recall": 0.9407894736842105,
+          "f1_score": 0.959731543624161,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9210526315789473,
+          "recall": 0.9271523178807947,
+          "f1_score": 0.9240924092409241,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.9875518672199171,
+          "recall": 1.0,
+          "f1_score": 0.9937369519832986,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9647887323943662,
+          "recall": 0.9547038327526133,
+          "f1_score": 0.9597197898423818,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 11,
+      "stage": 2,
+      "train_loss": 0.0444,
+      "train_accuracy": 0.9839,
+      "train_macro_f1": 0.9818,
+      "val_loss": 0.1029,
+      "val_accuracy": 0.9633,
+      "val_macro_precision": 0.9502,
+      "val_macro_recall": 0.9671,
+      "val_macro_f1": 0.9575,
+      "val_weighted_f1": 0.9632,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.94375,
+          "recall": 0.993421052631579,
+          "f1_score": 0.967948717948718,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.8571428571428571,
+          "recall": 1.0,
+          "f1_score": 0.9230769230769231,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9785714285714285,
+          "recall": 0.9013157894736842,
+          "f1_score": 0.9383561643835616,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9144736842105263,
+          "recall": 0.9205298013245033,
+          "f1_score": 0.9174917491749175,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.99581589958159,
+          "recall": 1.0,
+          "f1_score": 0.9979035639412998,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9614035087719298,
+          "recall": 0.9547038327526133,
+          "f1_score": 0.958041958041958,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 12,
+      "stage": 2,
+      "train_loss": 0.0466,
+      "train_accuracy": 0.9828,
+      "train_macro_f1": 0.9794,
+      "val_loss": 0.0998,
+      "val_accuracy": 0.9686,
+      "val_macro_precision": 0.9551,
+      "val_macro_recall": 0.9705,
+      "val_macro_f1": 0.9613,
+      "val_weighted_f1": 0.9685,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9934640522875817,
+          "recall": 1.0,
+          "f1_score": 0.9967213114754099,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.8275862068965517,
+          "recall": 1.0,
+          "f1_score": 0.9056603773584906,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9594594594594594,
+          "recall": 0.9342105263157895,
+          "f1_score": 0.9466666666666667,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9710144927536232,
+          "recall": 0.8874172185430463,
+          "f1_score": 0.9273356401384083,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.9916666666666667,
+          "recall": 1.0,
+          "f1_score": 0.99581589958159,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9425675675675675,
+          "recall": 0.9721254355400697,
+          "f1_score": 0.9571183533447685,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 13,
+      "stage": 2,
+      "train_loss": 0.0345,
+      "train_accuracy": 0.9874,
+      "train_macro_f1": 0.9866,
+      "val_loss": 0.0822,
+      "val_accuracy": 0.9749,
+      "val_macro_precision": 0.9788,
+      "val_macro_recall": 0.978,
+      "val_macro_f1": 0.9783,
+      "val_weighted_f1": 0.9748,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9620253164556962,
+          "recall": 1.0,
+          "f1_score": 0.9806451612903225,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9733333333333334,
+          "recall": 0.9605263157894737,
+          "f1_score": 0.9668874172185431,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9586206896551724,
+          "recall": 0.9205298013245033,
+          "f1_score": 0.9391891891891891,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.99581589958159,
+          "recall": 1.0,
+          "f1_score": 0.9979035639412998,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9618055555555556,
+          "recall": 0.9651567944250871,
+          "f1_score": 0.9634782608695652,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 14,
+      "stage": 2,
+      "train_loss": 0.0297,
+      "train_accuracy": 0.9909,
+      "train_macro_f1": 0.9907,
+      "val_loss": 0.0983,
+      "val_accuracy": 0.9695,
+      "val_macro_precision": 0.9686,
+      "val_macro_recall": 0.9701,
+      "val_macro_f1": 0.9685,
+      "val_weighted_f1": 0.9692,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9681528662420382,
+          "recall": 1.0,
+          "f1_score": 0.9838187702265372,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.9230769230769231,
+          "recall": 1.0,
+          "f1_score": 0.96,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9862068965517241,
+          "recall": 0.9407894736842105,
+          "f1_score": 0.9629629629629629,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9776119402985075,
+          "recall": 0.8675496688741722,
+          "f1_score": 0.9192982456140351,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.9916666666666667,
+          "recall": 1.0,
+          "f1_score": 0.99581589958159,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9337748344370861,
+          "recall": 0.9825783972125436,
+          "f1_score": 0.9575551782682513,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 15,
+      "stage": 2,
+      "train_loss": 0.0316,
+      "train_accuracy": 0.9892,
+      "train_macro_f1": 0.9884,
+      "val_loss": 0.1267,
+      "val_accuracy": 0.9642,
+      "val_macro_precision": 0.9565,
+      "val_macro_recall": 0.9632,
+      "val_macro_f1": 0.9574,
+      "val_weighted_f1": 0.9639,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9869281045751634,
+          "recall": 0.993421052631579,
+          "f1_score": 0.9901639344262295,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.8275862068965517,
+          "recall": 1.0,
+          "f1_score": 0.9056603773584906,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9927007299270073,
+          "recall": 0.8947368421052632,
+          "f1_score": 0.9411764705882353,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9848484848484849,
+          "recall": 0.8609271523178808,
+          "f1_score": 0.9187279151943463,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.99581589958159,
+          "recall": 1.0,
+          "f1_score": 0.9979035639412998,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9076433121019108,
+          "recall": 0.9930313588850174,
+          "f1_score": 0.9484193011647255,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 16,
+      "stage": 2,
+      "train_loss": 0.0293,
+      "train_accuracy": 0.9901,
+      "train_macro_f1": 0.9912,
+      "val_loss": 0.0912,
+      "val_accuracy": 0.9713,
+      "val_macro_precision": 0.9678,
+      "val_macro_recall": 0.9725,
+      "val_macro_f1": 0.9695,
+      "val_weighted_f1": 0.9711,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9559748427672956,
+          "recall": 1.0,
+          "f1_score": 0.977491961414791,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.9230769230769231,
+          "recall": 1.0,
+          "f1_score": 0.96,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9793103448275862,
+          "recall": 0.9342105263157895,
+          "f1_score": 0.9562289562289562,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9712230215827338,
+          "recall": 0.8940397350993378,
+          "f1_score": 0.9310344827586207,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.99581589958159,
+          "recall": 1.0,
+          "f1_score": 0.9979035639412998,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9493243243243243,
+          "recall": 0.9790940766550522,
+          "f1_score": 0.9639794168096055,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 17,
+      "stage": 2,
+      "train_loss": 0.0284,
+      "train_accuracy": 0.9907,
+      "train_macro_f1": 0.9886,
+      "val_loss": 0.0785,
+      "val_accuracy": 0.9731,
+      "val_macro_precision": 0.9625,
+      "val_macro_recall": 0.9757,
+      "val_macro_f1": 0.9685,
+      "val_weighted_f1": 0.973,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9681528662420382,
+          "recall": 1.0,
+          "f1_score": 0.9838187702265372,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.8888888888888888,
+          "recall": 1.0,
+          "f1_score": 0.9411764705882353,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9722222222222222,
+          "recall": 0.9210526315789473,
+          "f1_score": 0.9459459459459459,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9403973509933775,
+          "recall": 0.9403973509933775,
+          "f1_score": 0.9403973509933775,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.99581589958159,
+          "recall": 1.0,
+          "f1_score": 0.9979035639412998,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.972027972027972,
+          "recall": 0.9686411149825784,
+          "f1_score": 0.9703315881326352,
+          "support": 287
+        }
+      }
+    },
+    {
+      "epoch": 18,
+      "stage": 2,
+      "train_loss": 0.028,
+      "train_accuracy": 0.9899,
+      "train_macro_f1": 0.9888,
+      "val_loss": 0.0835,
+      "val_accuracy": 0.9713,
+      "val_macro_precision": 0.9591,
+      "val_macro_recall": 0.9734,
+      "val_macro_f1": 0.9653,
+      "val_weighted_f1": 0.9713,
+      "val_per_class": {
+        "background": {
+          "index": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "support": 112
+        },
+        "potato_early_blight": {
+          "index": 1,
+          "precision": 0.9805194805194806,
+          "recall": 0.993421052631579,
+          "f1_score": 0.9869281045751634,
+          "support": 152
+        },
+        "potato_healthy": {
+          "index": 2,
+          "precision": 0.8571428571428571,
+          "recall": 1.0,
+          "f1_score": 0.9230769230769231,
+          "support": 24
+        },
+        "potato_late_blight": {
+          "index": 3,
+          "precision": 0.9790209790209791,
+          "recall": 0.9210526315789473,
+          "f1_score": 0.9491525423728814,
+          "support": 152
+        },
+        "tomato_early_blight": {
+          "index": 4,
+          "precision": 0.9459459459459459,
+          "recall": 0.9271523178807947,
+          "f1_score": 0.9364548494983278,
+          "support": 151
+        },
+        "tomato_healthy": {
+          "index": 5,
+          "precision": 0.99581589958159,
+          "recall": 1.0,
+          "f1_score": 0.9979035639412998,
+          "support": 238
+        },
+        "tomato_late_blight": {
+          "index": 6,
+          "precision": 0.9554794520547946,
+          "recall": 0.9721254355400697,
+          "f1_score": 0.9637305699481865,
+          "support": 287
+        }
+      }
+    }
+  ]
+}

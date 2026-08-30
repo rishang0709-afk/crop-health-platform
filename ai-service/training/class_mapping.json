@@ -1,0 +1,21 @@
+{
+  "index_to_class": {
+    "0": "background",
+    "1": "potato_early_blight",
+    "2": "potato_healthy",
+    "3": "potato_late_blight",
+    "4": "tomato_early_blight",
+    "5": "tomato_healthy",
+    "6": "tomato_late_blight"
+  },
+  "class_to_index": {
+    "background": 0,
+    "potato_early_blight": 1,
+    "potato_healthy": 2,
+    "potato_late_blight": 3,
+    "tomato_early_blight": 4,
+    "tomato_healthy": 5,
+    "tomato_late_blight": 6
+  },
+  "num_classes": 7
+}

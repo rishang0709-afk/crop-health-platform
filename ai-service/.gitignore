@@ -1,2 +1,7 @@
 __pycache__/
 *.py[cod]
+data/
+model_weights/
+training/*_repo/
+training/*.txt
+training/*.csv

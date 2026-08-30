@@ -1,0 +1,14 @@
+# Training Dependencies for Crop Health AI Service
+# PyTorch & Torchvision
+torch>=2.2.0
+torchvision>=0.17.0
+
+# Metrics & Evaluation
+scikit-learn>=1.4.0
+
+# Data & Image Processing
+numpy>=1.26.0
+pandas>=2.2.0
+Pillow>=10.2.0
+ImageHash>=4.3.1
+tqdm>=4.66.0

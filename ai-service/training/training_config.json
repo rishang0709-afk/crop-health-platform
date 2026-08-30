@@ -1,0 +1,45 @@
+{
+  "dataset_version": "crop-health-v1",
+  "seed": 42,
+  "architecture": "mobilenet_v3_small",
+  "num_classes": 7,
+  "input_size": [3, 224, 224],
+  "batch_size": 32,
+  "num_workers": 0,
+  "warmup_epochs": 5,
+  "finetune_epochs": 20,
+  "warmup_lr": 0.001,
+  "backbone_lr": 0.00003,
+  "classifier_lr": 0.0003,
+  "weight_decay": 0.0001,
+  "early_stopping_patience": 5,
+  "early_stopping_min_delta": 0.002,
+  "checkpoint_dir": "training/checkpoints",
+  "checkpoint_file": "best_model.pt",
+  "training_manifest_path": "data/manifests/training_manifest.csv",
+  "field_eval_manifest_path": "data/manifests/field_eval_manifest.csv",
+  "class_mapping_path": "training/class_mapping.json",
+  "normalization": {
+    "mean": [0.485, 0.456, 0.406],
+    "std": [0.229, 0.224, 0.225]
+  },
+  "augmentation": {
+    "random_resized_crop": {
+      "size": 224,
+      "scale": [0.8, 1.0],
+      "ratio": [0.9, 1.1]
+    },
+    "random_horizontal_flip": {
+      "p": 0.5
+    },
+    "random_rotation": {
+      "degrees": 15
+    },
+    "color_jitter": {
+      "brightness": 0.15,
+      "contrast": 0.15,
+      "saturation": 0.15,
+      "hue": 0.05
+    }
+  }
+}
