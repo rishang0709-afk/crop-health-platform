@@ -5,6 +5,7 @@ const fieldRoutes = require('./routes/fieldRoutes');
 const detectionRoutes = require('./routes/detectionRoutes');
 const expertReviewRoutes = require('./routes/expertReviewRoutes');
 const alertRoutes = require('./routes/alertRoutes');
+const officerRoutes = require('./routes/officerRoutes');
 
 const app = express();
 
@@ -45,6 +46,9 @@ app.use('/api/expert-reviews', expertReviewRoutes);
 
 // Alert routes
 app.use('/api/alerts', alertRoutes);
+
+// Officer routes
+app.use('/api/officer', officerRoutes);
 
 // --- Global error handler ---
 // Must be defined last, after all routes.
