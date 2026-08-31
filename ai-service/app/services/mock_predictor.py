@@ -13,12 +13,21 @@ Deterministic rules:
 """
 
 from typing import Optional
+from app.config import MOCK_MODEL_NAME, MOCK_MODEL_VERSION
 from app.schemas.prediction import Prediction, PredictionType, Severity, SeverityLevel
 from app.services.base_predictor import BasePredictor
 
 
 class MockPredictor(BasePredictor):
     """Deterministic mock inference implementation."""
+
+    @property
+    def model_name(self) -> str:
+        return MOCK_MODEL_NAME
+
+    @property
+    def model_version(self) -> str:
+        return MOCK_MODEL_VERSION
 
     def predict(
         self,

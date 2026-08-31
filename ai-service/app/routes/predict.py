@@ -7,21 +7,27 @@ using the configured predictor instance.
 
 from typing import Optional
 from fastapi import APIRouter, File, Form, UploadFile, Depends
-from app.config import MODEL_NAME, MODEL_VERSION
+from app.config import MODEL_NAME, MODEL_VERSION, AI_PREDICTOR
 from app.schemas.prediction import ModelMetadata, PredictionResponse
 from app.services.base_predictor import BasePredictor
 from app.services.image_processor import validate_and_process_image
 from app.services.mock_predictor import MockPredictor
+from app.services.real_predictor import RealModelPredictor
 
 router = APIRouter(tags=["Inference"])
 
-# Default predictor instance (easily swappable via dependency injection)
-_default_predictor = MockPredictor()
-
+# Predictor instances
+_mock_predictor = MockPredictor()
+_real_predictor = None  # Lazy load if needed to prevent startup crash if PyTorch is missing
 
 def get_predictor() -> BasePredictor:
     """Dependency provider for the prediction engine."""
-    return _default_predictor
+    global _real_predictor
+    if AI_PREDICTOR.lower() == "real":
+        if _real_predictor is None:
+            _real_predictor = RealModelPredictor()
+        return _real_predictor
+    return _mock_predictor
 
 
 @router.post(
@@ -62,7 +68,7 @@ async def predict_crop_health(
         success=True,
         prediction=prediction,
         model=ModelMetadata(
-            name=MODEL_NAME,
-            version=MODEL_VERSION,
+            name=predictor.model_name,
+            version=predictor.model_version,
         ),
     )

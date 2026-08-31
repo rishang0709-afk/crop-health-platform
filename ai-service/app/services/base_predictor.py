@@ -34,3 +34,15 @@ class BasePredictor(ABC):
             Prediction object conforming to Docs/AI.md.
         """
         pass
+
+    @property
+    @abstractmethod
+    def model_name(self) -> str:
+        """Name of the model used by this predictor."""
+        pass
+
+    @property
+    @abstractmethod
+    def model_version(self) -> str:
+        """Version of the model used by this predictor."""
+        pass
