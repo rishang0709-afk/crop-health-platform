@@ -68,6 +68,43 @@ export default function LoginPage() {
 
       {error && <ErrorAlert error={error} onDismiss={() => setError(null)} className="mb-5" />}
 
+      {/* Demo Account Quick-Fill for Evaluators */}
+      <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
+          Demo Quick-Fill (Evaluators)
+        </span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          <button
+            type="button"
+            onClick={() => setEmail('farmer.demo@crophealth.local')}
+            className="px-2 py-1 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-lg text-xs font-semibold text-slate-700 hover:text-emerald-800 transition-all cursor-pointer text-center"
+          >
+            🌾 Farmer
+          </button>
+          <button
+            type="button"
+            onClick={() => setEmail('expert.demo@crophealth.local')}
+            className="px-2 py-1 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-lg text-xs font-semibold text-slate-700 hover:text-emerald-800 transition-all cursor-pointer text-center"
+          >
+            🔬 Expert
+          </button>
+          <button
+            type="button"
+            onClick={() => setEmail('officer.demo@crophealth.local')}
+            className="px-2 py-1 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-lg text-xs font-semibold text-slate-700 hover:text-emerald-800 transition-all cursor-pointer text-center"
+          >
+            👮 Officer
+          </button>
+          <button
+            type="button"
+            onClick={() => setEmail('admin.demo@crophealth.local')}
+            className="px-2 py-1 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-lg text-xs font-semibold text-slate-700 hover:text-emerald-800 transition-all cursor-pointer text-center"
+          >
+            ⚙️ Admin
+          </button>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-1">

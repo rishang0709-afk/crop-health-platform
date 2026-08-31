@@ -35,7 +35,7 @@ const STATUS_DETAILS = {
   EXPERT_REVIEW_REQUIRED: {
     icon: '⚠️',
     title: 'Expert Verification Recommended',
-    description: 'The AI model detected uncertainty for this image. Human expert review is recommended before taking major interventions.',
+    description: 'The AI model flagged this image for human verification before major field intervention.',
     style: 'bg-amber-50 border-amber-200 text-amber-900',
   },
   EXPERT_REVIEW_IN_PROGRESS: {

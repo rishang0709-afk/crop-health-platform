@@ -46,7 +46,7 @@ export default function AnalysisResultView({ prediction, severity, status }) {
         {/* Confidence Display */}
         <div className="bg-slate-50/90 p-4 rounded-xl border border-slate-200/80">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-600">Model Confidence</span>
+            <span className="text-xs font-semibold text-slate-600">Model Score</span>
             <span className="text-sm font-bold text-slate-900 font-mono">{confidenceValue}</span>
           </div>
           {prediction?.confidence !== undefined && prediction?.confidence !== null && (
@@ -58,7 +58,7 @@ export default function AnalysisResultView({ prediction, severity, status }) {
             </div>
           )}
           <p className="text-[11px] text-slate-400 mt-2">
-            Confidence represents the statistical likelihood score calculated by the model.
+            This score reflects the AI model's classification output. It is not a guarantee of diagnosis and uncertain cases are referred for expert review.
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export default function AnalysisResultView({ prediction, severity, status }) {
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-slate-600">Apparent Severity</span>
             <span className="text-sm font-bold text-slate-900 capitalize">
-              {severity?.level || 'Not estimated'}
+              {severity?.level || 'Not estimated by the current AI model.'}
             </span>
           </div>
           {severity?.score !== undefined && severity?.score !== null && (
@@ -81,7 +81,7 @@ export default function AnalysisResultView({ prediction, severity, status }) {
           <p className="text-[11px] text-slate-400 mt-2">
             {severity?.score !== undefined && severity?.score !== null
               ? `Severity index: ${severity.score}/100 based on observed leaf coverage.`
-              : 'Severity assessment is not supported or was null for this class.'}
+              : 'Severity estimation is not provided for this class by the current vision model.'}
           </p>
         </div>
       </div>
