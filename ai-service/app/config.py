@@ -6,6 +6,10 @@ Uses standard os.getenv to avoid unnecessary dependencies.
 """
 
 import os
+from pathlib import Path
+
+AI_SERVICE_DIR: Path = Path(__file__).resolve().parent.parent
+DEFAULT_MODEL_PATH: str = str(AI_SERVICE_DIR / "models" / "crop-health-v1-exp-d.pt")
 
 PORT: int = int(os.getenv("PORT", "8000"))
 HOST: str = os.getenv("HOST", "0.0.0.0")
@@ -21,7 +25,15 @@ MODEL_NAME: str = MOCK_MODEL_NAME
 MODEL_VERSION: str = MOCK_MODEL_VERSION
 MODEL_STATUS: str = "real" if os.getenv("AI_PREDICTOR", "mock").lower() == "real" else "mock"
 AI_PREDICTOR: str = os.getenv("AI_PREDICTOR", "mock")
-AI_MODEL_PATH: str = os.getenv("AI_MODEL_PATH", "training/experiments/exp_d_full_multidomain/best_model.pt")
+
+_env_model_path = os.getenv("AI_MODEL_PATH")
+if _env_model_path:
+    if os.path.isabs(_env_model_path) or os.path.exists(_env_model_path):
+        AI_MODEL_PATH: str = _env_model_path
+    else:
+        AI_MODEL_PATH: str = str(AI_SERVICE_DIR / _env_model_path)
+else:
+    AI_MODEL_PATH: str = DEFAULT_MODEL_PATH
 
 # Allowed image MIME types and formats
 ALLOWED_IMAGE_FORMATS: set[str] = {"JPEG", "PNG", "WEBP"}
