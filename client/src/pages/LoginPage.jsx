@@ -28,8 +28,20 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email.trim(), password);
-      const destination = location.state?.from?.pathname || '/dashboard';
+      const res = await login(email.trim(), password);
+      const userRole = res?.data?.user?.role;
+      const fromPath = location.state?.from?.pathname;
+
+      let destination = '/dashboard';
+      if (userRole === 'expert') {
+        destination = (fromPath && fromPath.startsWith('/expert')) ? fromPath : '/expert/queue';
+      } else if (userRole === 'officer' || userRole === 'admin') {
+        destination = (fromPath && fromPath.startsWith('/officer')) ? fromPath : '/officer/dashboard';
+      } else {
+        // farmer default
+        destination = (fromPath && !fromPath.startsWith('/officer') && !fromPath.startsWith('/expert')) ? fromPath : '/dashboard';
+      }
+
       navigate(destination, { replace: true });
     } catch (err) {
       setError(err);

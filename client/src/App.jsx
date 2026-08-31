@@ -37,6 +37,10 @@ import OfficerDashboardPage from './pages/officer/OfficerDashboardPage';
 import HotspotListPage from './pages/officer/HotspotListPage';
 import SurveillanceMapPage from './pages/officer/SurveillanceMapPage';
 
+// Expert Pages
+import ExpertQueuePage from './pages/ExpertQueuePage';
+import ExpertReviewDetailPage from './pages/ExpertReviewDetailPage';
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -65,6 +69,32 @@ export default function App() {
             <Route path="/detections/new" element={<NewDetectionPage />} />
             <Route path="/detections/:id" element={<DetectionDetailPage />} />
           </Route>
+
+          {/* Protected Expert Routes */}
+          <Route
+            path="/expert"
+            element={
+              <RoleProtectedRoute allowedRoles={['expert']}>
+                <Navigate to="/expert/queue" replace />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/expert/queue"
+            element={
+              <RoleProtectedRoute allowedRoles={['expert']}>
+                <ExpertQueuePage />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/expert/reviews/:id"
+            element={
+              <RoleProtectedRoute allowedRoles={['expert']}>
+                <ExpertReviewDetailPage />
+              </RoleProtectedRoute>
+            }
+          />
 
           {/* Protected Officer Routes */}
           <Route
